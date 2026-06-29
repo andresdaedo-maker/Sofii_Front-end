@@ -5,11 +5,7 @@ import { Order } from "@/types";
 import Link from "next/link";
 
 async function getOrders(): Promise<{ data: Order[] }> {
-  try {
-    return await fetchAPI('/orders?populate=*');
-  } catch {
-    return { data: [] };
-  }
+  return await fetchAPI('/orders?populate=*');
 }
 
 export default async function OrdersPage() {
@@ -28,7 +24,7 @@ export default async function OrdersPage() {
   return (
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h1 className="text-2xl lg:text-3xl font-bold"> Pedidos</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold">📋 Pedidos</h1>
         <Link href="/orders/new" className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition">
           + Nuevo Pedido
         </Link>

@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "sonner";
 import { Client, Product, OrderItem } from "@/types";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { fetchAPI, mutateAPI } from "@/lib/api";
 import { Search } from "lucide-react";
 
 export default function NewOrderPage() {
@@ -32,25 +33,13 @@ export default function NewOrderPage() {
   }, []);
 
   const loadClients = async () => {
-    try {
-      const res = await fetch("http://localhost:1337/api/clients");
-      const data = await res.json();
-      setClients(Array.isArray(data.data) ? data.data : []);
-    } catch (error) {
-      console.error("Error cargando clientes:", error);
-      setClients([]);
-    }
+    const data = await fetchAPI('/clients');
+    setClients(Array.isArray(data.data) ? data.data : []);
   };
 
   const loadProducts = async () => {
-    try {
-      const res = await fetch("http://localhost:1337/api/products?populate=*");
-      const data = await res.json();
-      setProducts(Array.isArray(data.data) ? data.data : []);
-    } catch (error) {
-      console.error("Error cargando productos:", error);
-      setProducts([]);
-    }
+    const data = await fetchAPI('/products?populate=*');
+    setProducts(Array.isArray(data.data) ? data.data : []);
   };
 
   const getCategoryName = (product: any): string => {
@@ -110,49 +99,39 @@ export default function NewOrderPage() {
     try {
       const orderItemsIds = [];
       for (const item of items) {
-        const res = await fetch("http://localhost:1337/api/order-items", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            data: {
-              quantity: item.quantity,
-              unit_price: item.unit_price,
-              subtotal: item.subtotal,
-              product: { connect: [{ id: item.product.id }] },
-            },
-          }),
+        const data = await mutateAPI('/order-items', 'POST', {
+          data: {
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            subtotal: item.subtotal,
+            product: { connect: [{ id: item.product.id }] },
+          },
         });
-        const data = await res.json();
         orderItemsIds.push(data.data.id);
       }
 
       const client = clients.find((c) => c.id === selectedClient);
-      await fetch("http://localhost:1337/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          data: {
-            client_name: client?.name || "Cliente",
-            due_date: dueDate,
-            order_status: "pendiente",
-            client: { connect: [{ id: selectedClient }] },
-            order_items: { connect: orderItemsIds.map((id) => ({ id })) },
-          },
-        }),
+      await mutateAPI('/orders', 'POST', {
+        data: {
+          client_name: client?.name || "Cliente",
+          due_date: dueDate,
+          order_status: "pendiente",
+          client: { connect: [{ id: selectedClient }] },
+          order_items: { connect: orderItemsIds.map((id) => ({ id })) },
+        },
       });
 
       toast.success("Pedido creado exitosamente");
       window.location.href = "/orders";
     } catch (error) {
       toast.error("Error al crear el pedido");
-      console.error(error);
     }
     setLoading(false);
   };
 
   return (
     <div>
-      <h1 className="text-2xl lg:text-3xl font-bold mb-6"> Nuevo Pedido</h1>
+      <h1 className="text-2xl lg:text-3xl font-bold mb-6">🛒 Nuevo Pedido</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
@@ -215,11 +194,7 @@ export default function NewOrderPage() {
 
             <div>
               <Label>Fecha límite de pago</Label>
-              <Input
-                type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-              />
+              <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
             </div>
 
             <div className="border-t pt-4">
@@ -282,17 +257,10 @@ export default function NewOrderPage() {
 
                 <div>
                   <Label>Cantidad</Label>
-                  <Input
-                    type="number"
-                    min="1"
-                    value={quantity}
-                    onChange={(e) => setQuantity(Number(e.target.value))}
-                  />
+                  <Input type="number" min="1" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} />
                 </div>
 
-                <Button onClick={addItem} className="w-full">
-                  + Agregar al pedido
-                </Button>
+                <Button onClick={addItem} className="w-full">+ Agregar al pedido</Button>
               </div>
             </div>
           </CardContent>
@@ -306,8 +274,7 @@ export default function NewOrderPage() {
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 min-h-[300px]">
               <div className="text-center mb-4">
                 <p className="text-sm text-gray-500">
-                  Cliente:{" "}
-                  {clients.find((c) => c.id === selectedClient)?.name || "Sin seleccionar"}
+                  Cliente: {clients.find((c) => c.id === selectedClient)?.name || "Sin seleccionar"}
                 </p>
                 <p className="text-sm text-gray-500">Vence: {dueDate || "Sin fecha"}</p>
               </div>
@@ -327,31 +294,20 @@ export default function NewOrderPage() {
                     {items.map((item) => (
                       <TableRow key={item.id}>
                         <TableCell>
-                          <div>
-                            <p className="font-medium text-sm">{item.product.name}</p>
-                            <p className="text-xs text-gray-500">
-                              {getCategoryName(item.product)}
-                            </p>
-                          </div>
+                          <p className="font-medium text-sm">{item.product.name}</p>
+                          <p className="text-xs text-gray-500">{getCategoryName(item.product)}</p>
                         </TableCell>
                         <TableCell>{item.quantity}</TableCell>
                         <TableCell>${item.unit_price}</TableCell>
                         <TableCell>${item.subtotal}</TableCell>
                         <TableCell>
-                          <button
-                            onClick={() => removeItem(item.id)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            ✕
-                          </button>
+                          <button onClick={() => removeItem(item.id)} className="text-red-500 hover:text-red-700">✕</button>
                         </TableCell>
                       </TableRow>
                     ))}
                     {items.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center text-gray-400">
-                          Sin productos
-                        </TableCell>
+                        <TableCell colSpan={5} className="text-center text-gray-400">Sin productos</TableCell>
                       </TableRow>
                     )}
                   </TableBody>
@@ -364,7 +320,7 @@ export default function NewOrderPage() {
             </div>
 
             <Button onClick={saveOrder} disabled={loading} className="w-full mt-4">
-              {loading ? "Guardando..." : "Guardar Pedido"}
+              {loading ? "Guardando..." : "💾 Guardar Pedido"}
             </Button>
           </CardContent>
         </Card>

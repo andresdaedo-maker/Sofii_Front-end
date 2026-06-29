@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { fetchAPI, mutateAPI } from "@/lib/api";
 import { Plus, Pencil } from "lucide-react";
 
 export default function ProductsPage() {
@@ -30,23 +31,13 @@ export default function ProductsPage() {
   }, []);
 
   const loadProducts = async () => {
-    try {
-      const res = await fetch("http://localhost:1337/api/products?populate=*");
-      const data = await res.json();
-      setProducts(Array.isArray(data.data) ? data.data : []);
-    } catch (error) {
-      console.error("Error cargando productos:", error);
-    }
+    const data = await fetchAPI('/products?populate=*');
+    setProducts(Array.isArray(data.data) ? data.data : []);
   };
 
   const loadCategories = async () => {
-    try {
-      const res = await fetch("http://localhost:1337/api/categories");
-      const data = await res.json();
-      setCategories(Array.isArray(data.data) ? data.data : []);
-    } catch (error) {
-      console.error("Error cargando categorías:", error);
-    }
+    const data = await fetchAPI('/categories');
+    setCategories(Array.isArray(data.data) ? data.data : []);
   };
 
   const getCategoryName = (product: any): string => {
@@ -118,11 +109,7 @@ export default function ProductsPage() {
           updateData.categories = { set: [] };
         }
         
-        await fetch(`http://localhost:1337/api/products/${productId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ data: updateData }),
-        });
+        await mutateAPI(`/products/${productId}`, 'PUT', { data: updateData });
         toast.success("Producto actualizado");
       } else {
         const createData: any = {
@@ -136,11 +123,7 @@ export default function ProductsPage() {
           createData.categories = { connect: [{ id: Number(categoryId) }] };
         }
         
-        await fetch("http://localhost:1337/api/products", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ data: createData }),
-        });
+        await mutateAPI('/products', 'POST', { data: createData });
         toast.success("Producto creado");
       }
       
@@ -149,23 +132,17 @@ export default function ProductsPage() {
       loadProducts();
     } catch (error) {
       toast.error("Error al guardar producto");
-      console.error(error);
     }
   };
 
   const toggleActive = async (product: any) => {
     try {
       const productId = getProductId(product);
-      await fetch(`http://localhost:1337/api/products/${productId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: { active: !product.active } }),
-      });
+      await mutateAPI(`/products/${productId}`, 'PUT', { data: { active: !product.active } });
       toast.success("Estado actualizado");
       loadProducts();
     } catch (error) {
       toast.error("Error al actualizar");
-      console.error(error);
     }
   };
 
@@ -173,21 +150,18 @@ export default function ProductsPage() {
     if (!confirm("¿Eliminar este producto?")) return;
     try {
       const productId = getProductId(product);
-      await fetch(`http://localhost:1337/api/products/${productId}`, {
-        method: "DELETE",
-      });
+      await mutateAPI(`/products/${productId}`, 'DELETE');
       toast.success("Producto eliminado");
       loadProducts();
     } catch (error) {
       toast.error("Error al eliminar");
-      console.error(error);
     }
   };
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Productos</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold">📦 Productos</h1>
         <Button onClick={openCreate}>
           <Plus className="mr-2 h-4 w-4" /> Nuevo Producto
         </Button>
