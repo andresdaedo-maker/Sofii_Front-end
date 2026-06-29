@@ -3,9 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export default function DashboardPage() {
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">📊 Dashboard</h1>
+      <h1 className="text-2xl lg:text-3xl font-bold mb-6">Dashboard</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader>
             <CardTitle className="text-sm text-gray-500">Pedidos Hoy</CardTitle>

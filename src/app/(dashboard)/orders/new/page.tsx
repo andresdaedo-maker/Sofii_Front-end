@@ -152,7 +152,7 @@ export default function NewOrderPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">🛒 Nuevo Pedido</h1>
+      <h1 className="text-2xl lg:text-3xl font-bold mb-6"> Nuevo Pedido</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
@@ -171,10 +171,10 @@ export default function NewOrderPage() {
                     <Search className="ml-2 h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[400px] p-0">
+                <PopoverContent className="w-[300px] lg:w-[400px] p-0">
                   <div className="p-2">
                     <Input
-                      placeholder="Buscar cliente por nombre, teléfono o email..."
+                      placeholder="Buscar cliente..."
                       value={searchClient}
                       onChange={(e) => setSearchClient(e.target.value)}
                       className="mb-2"
@@ -201,9 +201,7 @@ export default function NewOrderPage() {
                           >
                             <div>
                               <p className="font-medium">{client.name}</p>
-                              <p className="text-xs text-gray-500">
-                                {client.phone} | {client.email}
-                              </p>
+                              <p className="text-xs text-gray-500">{client.phone}</p>
                             </div>
                             <Badge variant="outline">{client.client_type}</Badge>
                           </div>
@@ -238,7 +236,7 @@ export default function NewOrderPage() {
                         <Search className="ml-2 h-4 w-4" />
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[400px] p-0">
+                    <PopoverContent className="w-[300px] lg:w-[400px] p-0">
                       <div className="p-2">
                         <Input
                           placeholder="Buscar por nombre o categoría..."
@@ -314,49 +312,51 @@ export default function NewOrderPage() {
                 <p className="text-sm text-gray-500">Vence: {dueDate || "Sin fecha"}</p>
               </div>
 
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Producto</TableHead>
-                    <TableHead>Cant</TableHead>
-                    <TableHead>Precio</TableHead>
-                    <TableHead>Subtotal</TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {items.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">{item.product.name}</p>
-                          <p className="text-xs text-gray-500">
-                            {getCategoryName(item.product)}
-                          </p>
-                        </div>
-                      </TableCell>
-                      <TableCell>{item.quantity}</TableCell>
-                      <TableCell>${item.unit_price}</TableCell>
-                      <TableCell>${item.subtotal}</TableCell>
-                      <TableCell>
-                        <button
-                          onClick={() => removeItem(item.id)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          ✕
-                        </button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {items.length === 0 && (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center text-gray-400">
-                        Sin productos
-                      </TableCell>
+                      <TableHead>Producto</TableHead>
+                      <TableHead>Cant</TableHead>
+                      <TableHead>Precio</TableHead>
+                      <TableHead>Subtotal</TableHead>
+                      <TableHead></TableHead>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {items.map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium text-sm">{item.product.name}</p>
+                            <p className="text-xs text-gray-500">
+                              {getCategoryName(item.product)}
+                            </p>
+                          </div>
+                        </TableCell>
+                        <TableCell>{item.quantity}</TableCell>
+                        <TableCell>${item.unit_price}</TableCell>
+                        <TableCell>${item.subtotal}</TableCell>
+                        <TableCell>
+                          <button
+                            onClick={() => removeItem(item.id)}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            ✕
+                          </button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {items.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center text-gray-400">
+                          Sin productos
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
 
               <div className="border-t mt-4 pt-4 text-right">
                 <p className="text-2xl font-bold">Total: ${total.toFixed(2)}</p>
@@ -364,7 +364,7 @@ export default function NewOrderPage() {
             </div>
 
             <Button onClick={saveOrder} disabled={loading} className="w-full mt-4">
-              {loading ? "Guardando..." : "💾 Guardar Pedido"}
+              {loading ? "Guardando..." : "Guardar Pedido"}
             </Button>
           </CardContent>
         </Card>
