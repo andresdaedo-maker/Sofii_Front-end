@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Package, ShoppingCart, LayoutDashboard, Menu } from "lucide-react";
+import { Package, ShoppingCart, LayoutDashboard, Menu, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -38,6 +38,16 @@ export default function DashboardLayout({
           <Package className="h-5 w-5" />
           <span>Productos</span>
         </Link>
+
+        <Link
+          href="/categories"
+          className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition text-gray-700
+          hover:text-black">
+            
+            <Tag className="h-5 w-5"/>
+            <span> Categorias</span>
+        </Link>
+    
       </nav>
 
       <div className="p-4 border-t">
