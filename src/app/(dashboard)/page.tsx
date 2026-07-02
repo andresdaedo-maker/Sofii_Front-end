@@ -41,6 +41,11 @@ export default function DashboardPage() {
             <p className="text-2xl font-bold text-red-600">$0.00</p>
           </CardContent>
         </Card>
+
+        {/* grafico de area */}
+        
+
+
       </div>
     </div>
   );

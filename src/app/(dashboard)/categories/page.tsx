@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { fetchAPI, mutateAPI } from "@/lib/api";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, Trash } from "lucide-react";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<any[]>([]);
@@ -151,7 +151,7 @@ export default function CategoriesPage() {
                           <Pencil className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={() => deleteCategory(category)}>
-                          <span className="text-red-500">🗑️</span>
+                          <Trash className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>

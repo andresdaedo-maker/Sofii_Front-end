@@ -10,12 +10,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { fetchAPI, mutateAPI } from "@/lib/api";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, Search, Trash, Trash2 } from "lucide-react";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [open, setOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   
@@ -51,10 +52,13 @@ export default function ProductsPage() {
     return product.documentId || product.id;
   };
 
-  const filteredProducts = products.filter((product: any) =>
-    product.name.toLowerCase().includes(search.toLowerCase()) ||
-    getCategoryName(product).toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredProducts = products.filter((product: any) => {
+    const matchSearch = product.name.toLowerCase().includes(search.toLowerCase());
+    const matchCategory = selectedCategory 
+      ? getCategoryName(product) === selectedCategory
+      : true;
+    return matchSearch && matchCategory;
+  });
 
   const resetForm = () => {
     setName("");
@@ -161,19 +165,35 @@ export default function ProductsPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl lg:text-3xl font-bold">📦 Productos</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold">Productos</h1>
         <Button onClick={openCreate}>
           <Plus className="mr-2 h-4 w-4" /> Nuevo Producto
         </Button>
       </div>
 
-      <div className="mb-4">
-        <Input
-          placeholder="Buscar por nombre o categoría..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="max-w-md"
-        />
+      {/* Filtros */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-4">
+        <div className="flex-1">
+          <Input
+            placeholder="Buscar por nombre del producto..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <div>
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="w-full sm:w-64 border rounded-md p-2"
+          >
+            <option value="">Todas las categorías</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.name}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <Card>
@@ -185,6 +205,7 @@ export default function ProductsPage() {
                 <TableHead>Categoría</TableHead>
                 <TableHead>Precio</TableHead>
                 <TableHead>Stock</TableHead>
+                <TableHead>Fecha de Registro</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead>Acciones</TableHead>
               </TableRow>
@@ -192,7 +213,7 @@ export default function ProductsPage() {
             <TableBody>
               {filteredProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-gray-400 py-8">
+                  <TableCell colSpan={7} className="text-center text-gray-400 py-8">
                     No se encontraron productos
                   </TableCell>
                 </TableRow>
@@ -207,6 +228,13 @@ export default function ProductsPage() {
                         {product.stock}
                       </Badge>
                     </TableCell>
+                    <TableCell className="text-sm text-gray-600">
+                      {new Date(product.createdAt).toLocaleDateString('es-CO', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                        })}
+                    </TableCell>
                     <TableCell>
                       <button onClick={() => toggleActive(product)}>
                         <Badge variant={product.active ? "default" : "outline"} className="cursor-pointer">
@@ -220,7 +248,7 @@ export default function ProductsPage() {
                           <Pencil className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={() => deleteProduct(product)}>
-                          <span className="text-red-500">🗑️</span>
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>
@@ -264,7 +292,7 @@ export default function ProductsPage() {
                 <option value="">Sin categoría</option>
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
-                    {cat.name} ({cat.type})
+                    {cat.name}
                   </option>
                 ))}
               </select>

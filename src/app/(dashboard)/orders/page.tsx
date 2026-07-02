@@ -1,15 +1,45 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { fetchAPI } from "@/lib/api";
 import { Order } from "@/types";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
-async function getOrders(): Promise<{ data: Order[] }> {
-  return await fetchAPI('/orders?populate=*');
-}
+export default function OrdersPage() {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const searchParams = useSearchParams();
+  const categoriaSeleccionada = searchParams.get('categoria') || '';
 
-export default async function OrdersPage() {
-  const { data: orders } = await getOrders();
+  useEffect(() => {
+    loadOrders();
+    loadCategories();
+  }, [categoriaSeleccionada]);
+
+  const loadOrders = async () => {
+    const data = await fetchAPI('/orders?populate=*');
+    const allOrders = Array.isArray(data.data) ? data.data : [];
+    
+    if (categoriaSeleccionada) {
+      const filtered = allOrders.filter((order: Order) => {
+        return order.order_items?.some((item: any) => {
+          const itemCategory = item.product?.categories?.[0]?.name;
+          return itemCategory === categoriaSeleccionada;
+        });
+      });
+      setOrders(filtered);
+    } else {
+      setOrders(allOrders);
+    }
+  };
+
+  const loadCategories = async () => {
+    const data = await fetchAPI('/categories');
+    setCategories(Array.isArray(data.data) ? data.data : []);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -24,41 +54,85 @@ export default async function OrdersPage() {
   return (
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h1 className="text-2xl lg:text-3xl font-bold">📋 Pedidos</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold">Pedidos</h1>
         <Link href="/orders/new" className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition">
           + Nuevo Pedido
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {orders?.map((order: Order) => (
-          <Card key={order.id} className="hover:shadow-lg transition">
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-lg">{order.order_number}</CardTitle>
-                <Badge className={getStatusColor(order.order_status)}>
-                  {order.order_status}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600">Cliente: {order.client?.name}</p>
-              <p className="text-sm text-gray-600">Vence: {order.due_date}</p>
-              <div className="mt-2">
-                {order.order_items?.map((item) => (
-                  <p key={item.id} className="text-sm">
-                    {item.quantity}x {item.product?.name} - ${item.subtotal}
-                  </p>
-                ))}
-              </div>
-              <p className="text-xl font-bold mt-2">Total: ${order.total}</p>
-            </CardContent>
-          </Card>
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+        <Link
+          href="/orders"
+          className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${
+            categoriaSeleccionada === '' ? 'bg-black text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+         General
+        </Link>
+        {categories?.map((category: any) => (
+          <Link
+            key={category.id}
+            href={`/orders?categoria=${encodeURIComponent(category.name)}`}
+            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${
+              categoriaSeleccionada === category.name ? 'bg-black text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+             {category.name}
+          </Link>
         ))}
       </div>
 
-      {orders?.length === 0 && (
-        <p className="text-center text-gray-500 mt-10">No hay pedidos aún.</p>
+      {categoriaSeleccionada && (
+        <p className="text-sm text-gray-500 mb-4">
+          Mostrando pedidos de: <strong>{categoriaSeleccionada}</strong> ({orders.length} pedidos)
+        </p>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {orders.map((order: Order) => (
+          <Link href={`/orders/${order.id}`} key={order.id}>
+            <Card className="hover:shadow-lg transition cursor-pointer">
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-lg">{order.order_number}</CardTitle>
+                  <Badge className={getStatusColor(order.order_status)}>{order.order_status}</Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-3">
+                  <p className="text-xs text-gray-400 uppercase">Cliente</p>
+                  <p className="text-base font-semibold text-gray-800">{order.client?.name || "Sin cliente"}</p>
+                </div>
+                <div className="mb-3">
+                  <p className="text-xs text-gray-400 uppercase">Vence</p>
+                  <p className="text-sm text-gray-600">
+                    {order.due_date ? new Date(order.due_date).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' }) : "Sin fecha"}
+                  </p>
+                </div>
+                <div className="border-t my-3"></div>
+                <div className="space-y-1 mb-3">
+                  {order.order_items?.map((item: any) => (
+                    <div key={item.id} className="flex justify-between text-sm">
+                      <span className="text-gray-700">{item.quantity}x {item.product?.name}</span>
+                      <span className="font-medium">${item.subtotal}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="border-t my-3"></div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-bold text-gray-700">Total</span>
+                  <span className="text-xl font-bold">${order.total}</span>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
+      </div>
+
+      {orders.length === 0 && (
+        <p className="text-center text-gray-500 mt-10">
+          No hay pedidos{ categoriaSeleccionada ? ` de "${categoriaSeleccionada}"` : '' } aún.
+        </p>
       )}
     </div>
   );
