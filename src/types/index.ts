@@ -1,7 +1,6 @@
 export interface Category {
   id: number;
   name: string;
-  type: 'ingreso' | 'egreso';
   description: string;
 }
 
@@ -21,7 +20,7 @@ export interface Product {
   price: number;
   stock: number;
   active: boolean;
-  category?: Category | null;
+  categories?: Category[];
 }
 
 export interface OrderItem {
@@ -29,16 +28,17 @@ export interface OrderItem {
   quantity: number;
   unit_price: number;
   subtotal: number;
-  product: Product;
+  product?: Product;
 }
 
 export interface Order {
   id: number;
+  documentId?: string;
   client_name: string;
   order_number: string;
   due_date: string;
   order_status: 'pendiente' | 'pagado' | 'vencido' | 'cancelado';
   total: number;
-  client: Client;
-  order_items: OrderItem[];
+  client?: Client;
+  order_items?: OrderItem[];
 }

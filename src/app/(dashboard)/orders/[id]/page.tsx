@@ -12,6 +12,7 @@ import { fetchAPI, mutateAPI } from "@/lib/api";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Copy, Save, Trash2 } from "lucide-react";
 import Link from "next/link";
+import DeleteDialog from "../../dialogs/DeleteDialog";
 
 export default function OrderDetailPage() {
   const params = useParams();
@@ -21,6 +22,7 @@ export default function OrderDetailPage() {
   const [editing, setEditing] = useState(false);
   const [orderStatus, setOrderStatus] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [showDelete, setShowDelete] = useState(false);
 
   useEffect(() => {
     loadOrder();
@@ -65,20 +67,18 @@ export default function OrderDetailPage() {
 
   const handleCopy = async () => {
     try {
-      // Crear nuevo pedido con los mismos datos
       const newOrder = {
         data: {
           client_name: order.client?.name || "Cliente",
           due_date: order.due_date,
           order_status: "pendiente",
-          client: order.client ? { connect: [{ id: order.client.id }] } : undefined,
+          client: order.client ? order.client.id : undefined,
         },
       };
 
       const res = await mutateAPI('/orders', 'POST', newOrder);
       const newOrderId = res.data.id;
 
-      // Copiar los items
       if (order.order_items) {
         for (const item of order.order_items) {
           await mutateAPI('/order-items', 'POST', {
@@ -86,8 +86,7 @@ export default function OrderDetailPage() {
               quantity: item.quantity,
               unit_price: item.unit_price,
               subtotal: item.subtotal,
-              product: { connect: [{ id: item.product?.id }] },
-              order: { connect: [{ id: newOrderId }] },
+              product: item.product?.id,
             },
           });
         }
@@ -98,6 +97,17 @@ export default function OrderDetailPage() {
     } catch (error) {
       toast.error("Error al copiar pedido");
     }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await mutateAPI(`/orders/${order.documentId || order.id}`, 'DELETE');
+      toast.success("Pedido eliminado exitosamente");
+      router.push("/orders");
+    } catch (error) {
+      toast.error("Error al eliminar el pedido");
+    }
+    setShowDelete(false);
   };
 
   if (loading) {
@@ -127,7 +137,7 @@ export default function OrderDetailPage() {
           <Link href="/orders" className="text-gray-500 hover:text-gray-700">
             <ArrowLeft className="h-5 w-5" />
           </Link>
-          <h1 className="text-2xl lg:text-3xl font-bold">{order.order_number}</h1>
+          <h1 className="text-2xl lg:text-3xl font-bold">{order.order_number || `PED-${order.id}`}</h1>
           <Badge className={getStatusColor(order.order_status)}>
             {order.order_status}
           </Badge>
@@ -135,6 +145,9 @@ export default function OrderDetailPage() {
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleCopy}>
             <Copy className="mr-2 h-4 w-4" /> Copiar Pedido
+          </Button>
+          <Button variant="outline" onClick={() => setShowDelete(true)} className="text-red-500 hover:text-red-700 hover:bg-red-50">
+            <Trash2 className="mr-2 h-4 w-4" /> Eliminar
           </Button>
           {!editing ? (
             <Button onClick={() => setEditing(true)}>
@@ -157,7 +170,7 @@ export default function OrderDetailPage() {
           <CardContent className="space-y-4">
             <div>
               <Label>Cliente</Label>
-              <p className="text-lg font-semibold">{order.client?.name || "Sin cliente"}</p>
+              <p className="text-lg font-semibold">{order.client?.name || order.client_name || "Sin cliente"}</p>
               {order.client?.phone && (
                 <p className="text-sm text-gray-500">📞 {order.client.phone}</p>
               )}
@@ -165,6 +178,13 @@ export default function OrderDetailPage() {
                 <p className="text-sm text-gray-500">📧 {order.client.email}</p>
               )}
             </div>
+
+            {order.category && (
+              <div>
+                <Label>Categoría</Label>
+                <Badge variant="outline">{order.category.name}</Badge>
+              </div>
+            )}
 
             <div>
               <Label>Estado</Label>
@@ -242,26 +262,36 @@ export default function OrderDetailPage() {
                 {order.order_items?.map((item: any) => (
                   <TableRow key={item.id}>
                     <TableCell>
-                      <p className="font-medium">{item.product?.name}</p>
-                      <p className="text-xs text-gray-500">
-                        {item.product?.categories?.[0]?.name || "Sin categoría"}
-                      </p>
+                      <p className="font-medium">{item.product?.name || "Producto"}</p>
                     </TableCell>
                     <TableCell>{item.quantity}</TableCell>
                     <TableCell>${item.unit_price}</TableCell>
                     <TableCell className="font-medium">${item.subtotal}</TableCell>
                   </TableRow>
                 ))}
+                {(!order.order_items || order.order_items.length === 0) && (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center text-gray-400">Sin productos</TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
 
             <div className="border-t mt-4 pt-4 text-right">
               <p className="text-sm text-gray-500">Total</p>
-              <p className="text-3xl font-bold">${order.total}</p>
+              <p className="text-3xl font-bold">${order.total || 0}</p>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      <DeleteDialog
+        open={showDelete}
+        onOpenChange={setShowDelete}
+        title="¿Eliminar pedido?"
+        message={`¿Estás seguro de eliminar el pedido ${order?.order_number || `PED-${order?.id}`}?`}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }

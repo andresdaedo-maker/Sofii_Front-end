@@ -1,25 +1,18 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1337/api';
-const API_TOKEN = '55f614bbd78d3cc386df4597c1d0c75c73a8cfcbe465b62fab742b6812b3f55a68d4663816aac79a2dccf38c65d874d7ed111e26dd7f3700d72b73f77e80e27dd45d7475a11fdcf428dc8986030140429f0d7f5c16fa8107418da9d9a24583bc972a85037ba12dc380ed8990de9244c01defea38883613c6e2a28d32541e0f4d';
+const API_TOKEN = '5a46c5e7241d9951dd13bb25ee3396b4fdae8f854c6f0d1d80950a2691965e0dfaebfa20629b41850f6219dcb373f449c899af8fdc0d115ff93e463a0745a41abcea653ea0d127dcbcf9942d65e623b32494c9eb97448927e12fe16bc9a998170f93c0d3f3aad08992e394b53ab0aec90243a6c2f20b1ab1a49fe894806338fe';
 
 function getHeaders(): HeadersInit {
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-  };
-  
-  if (API_TOKEN) {
-    headers['Authorization'] = `Bearer ${API_TOKEN}`;
-  }
-  
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (API_TOKEN) headers['Authorization'] = `Bearer ${API_TOKEN}`;
   return headers;
 }
 
 export async function fetchAPI(endpoint: string) {
   try {
-    const res = await fetch(`${API_URL}${endpoint}`, {
-      headers: getHeaders(),
-    });
+    const res = await fetch(`${API_URL}${endpoint}`, { headers: getHeaders() });
     if (!res.ok) throw new Error(`Error: ${res.status}`);
-    return await res.json();
+    const text = await res.text();
+    return text ? JSON.parse(text) : {};
   } catch (error) {
     console.error('Error en fetchAPI:', error);
     return { data: [] };
@@ -33,8 +26,16 @@ export async function mutateAPI(endpoint: string, method: string = 'POST', body?
       headers: getHeaders(),
       body: body ? JSON.stringify(body) : undefined,
     });
-    if (!res.ok) throw new Error(`Error: ${res.status}`);
-    return await res.json();
+    
+    const text = await res.text();
+    const data = text ? JSON.parse(text) : {};
+    
+    if (!res.ok) {
+      console.error('Error Strapi:', data);
+      throw new Error(data.error?.message || `Error: ${res.status}`);
+    }
+    
+    return data;
   } catch (error) {
     console.error('Error en mutateAPI:', error);
     throw error;
