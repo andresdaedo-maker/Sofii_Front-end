@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import DeleteDialog from "../dialogs/DeleteDialog";
+import { Trash2 } from "lucide-react";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -76,14 +77,14 @@ export default function OrdersPage() {
   return (
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h1 className="text-2xl lg:text-3xl font-bold">📋 Pedidos</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold"> Pedidos</h1>
         <Link href="/orders/new" className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition">+ Nuevo Pedido</Link>
       </div>
 
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-        <Link href="/orders" className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${categoriaSeleccionada === '' ? 'bg-black text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>📋 General</Link>
+        <Link href="/orders" className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${categoriaSeleccionada === '' ? 'bg-black text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}> General</Link>
         {categories?.map((category: any) => (
-          <Link key={category.id} href={`/orders?categoria=${encodeURIComponent(category.name)}`} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${categoriaSeleccionada === category.name ? 'bg-black text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>📁 {category.name}</Link>
+          <Link key={category.id} href={`/orders?categoria=${encodeURIComponent(category.name)}`} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${categoriaSeleccionada === category.name ? 'bg-black text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}> {category.name}</Link>
         ))}
       </div>
 
@@ -100,7 +101,13 @@ export default function OrdersPage() {
                   <CardTitle className="text-lg">{order.order_number || `PED-${order.id}`}</CardTitle>
                   <div className="flex items-center gap-2">
                     <Badge className={getStatusColor(order.order_status)}>{order.order_status}</Badge>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition" onClick={(e) => handleDelete(e, order)}>🗑️</Button>
+                    <Button 
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition"
+                    onClick={(e) => handleDelete(e, order)}>
+                      <Trash2 className="h-4 w-4"/>
+                    </Button>
                   </div>
                 </div>
               </CardHeader>

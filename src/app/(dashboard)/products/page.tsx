@@ -26,18 +26,38 @@ export default function ProductsPage() {
   const [categoryId, setCategoryId] = useState("");
   const [active, setActive] = useState(true);
 
+  const [currentPage,setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const PAGE_SIZE = 10;
+
   useEffect(() => {
     loadProducts();
     loadCategories();
-  }, []);
+  }, [currentPage, selectedCategory]);
 
   const loadProducts = async () => {
-    const data = await fetchAPI('/products?populate=*');
-    setProducts(Array.isArray(data.data) ? data.data : []);
+
+    let url = `/products?populate=*&pagination[page]=${currentPage}&pagination[pageSize]=${PAGE_SIZE}`;
+
+    if  (selectedCategory) {
+      const cat = categories.find(c => c.name === selectedCategory);
+      if (cat) {
+        url += `&filters[categories][id][$eq]=${cat.id}`;
+      }
+    }
+
+    const data = await fetchAPI(url);
+
+    if (data.data) {
+      setProducts(Array.isArray(data.data) ? data.data : []);
+
+    const total = data.meta?.pagination?.total || 0;
+    setTotalPages(Math.ceil(total / PAGE_SIZE));
+    }
   };
 
   const loadCategories = async () => {
-    const data = await fetchAPI('/categories');
+    const data = await fetchAPI('/categories?');
     setCategories(Array.isArray(data.data) ? data.data : []);
   };
 

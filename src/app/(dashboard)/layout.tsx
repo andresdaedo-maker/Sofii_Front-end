@@ -11,7 +11,7 @@ export default function DashboardLayout({
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       <div className="p-6 border-b">
-        <h1 className="text-xl font-bold text-gray-800">📦 Sistema Pedidos</h1>
+        <h1 className="text-xl font-bold text-gray-800">TIDEFII</h1>
       </div>
       
       <nav className="p-4 space-y-2 flex-1">
