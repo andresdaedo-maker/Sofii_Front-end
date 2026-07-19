@@ -28,7 +28,7 @@ export default function ProductsPage() {
 
   const [currentPage,setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const PAGE_SIZE = 10;
+  const PAGE_SIZE = 30;
 
   useEffect(() => {
     loadProducts();
@@ -276,9 +276,49 @@ export default function ProductsPage() {
                 ))
               )}
             </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                      </Table>
+            
+            {/* PAGINACIÓN */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between px-4 py-3 border-t">
+                <p className="text-sm text-gray-500">
+                  Página {currentPage} de {totalPages}
+                </p>
+                <div className="flex gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    ← Anterior
+                  </Button>
+                  
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(page)}
+                      className="w-10"
+                    >
+                      {page}
+                    </Button>
+                  ))}
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                  >
+                    Siguiente →
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>

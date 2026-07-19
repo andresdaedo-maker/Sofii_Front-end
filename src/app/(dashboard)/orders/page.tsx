@@ -78,25 +78,28 @@ export default function OrdersPage() {
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h1 className="text-2xl lg:text-3xl font-bold"> Pedidos</h1>
+        {/*nuevo pedido*/}
         <Link href="/orders/new" className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition">+ Nuevo Pedido</Link>
       </div>
 
+        {/*Mostrar pedidos de categoria seleccionada*/}
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
         <Link href="/orders" className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${categoriaSeleccionada === '' ? 'bg-black text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}> General</Link>
         {categories?.map((category: any) => (
           <Link key={category.id} href={`/orders?categoria=${encodeURIComponent(category.name)}`} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${categoriaSeleccionada === category.name ? 'bg-black text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}> {category.name}</Link>
         ))}
       </div>
-
+       
       {categoriaSeleccionada && (
         <p className="text-sm text-gray-500 mb-4">Mostrando pedidos de: <strong>{categoriaSeleccionada}</strong> ({orders.length} pedidos)</p>
       )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/*Tarjeta*/}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+ 
         {orders.map((order: Order) => (
           <Link href={`/orders/${order.id}`} key={order.id}>
             <Card className="hover:shadow-lg transition cursor-pointer relative group h-full">
-              <CardHeader className="pb-2">
+              <CardHeader className="pb-1 pt-3 px-3">
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-lg">{order.order_number || `PED-${order.id}`}</CardTitle>
                   <div className="flex items-center gap-2">
@@ -111,43 +114,70 @@ export default function OrdersPage() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="mb-3">
+
+              <CardContent className="px-3 pb-3 pt-0 space-y-1 text-sm">
+
+                 {/* Caja Cliente + Vence*/}
+              <div className="flex justify-between items-start mb-1">
+                {/*Cliente*/}
+                <div>
                   <p className="text-xs text-gray-400 uppercase">Cliente</p>
-                  <p className="text-base font-semibold text-gray-800">{order.client?.name || "Sin cliente"}</p>
+                  <p className="text-lg font-semibold text-gray-800">{order.client?.name || "Sin cliente"}</p>
                 </div>
-                <div className="mb-3">
+                
+                  {/*Categoria*/}
+                {order.order_items?.[0]?.product?.categories?.[0]?.name && (
+                  <div className="mb-3">
+                    <p className="text-xs text-gray-400 uppercase">Categoria</p>
+                    <Badge 
+                    variant="outline" 
+                    className="tex-xs">
+                      {order.order_items[0].product.categories[0].name}
+                      </Badge>
+                      </div>
+                     )}
+               
+              </div>
+ {/*Fecha de Vencimiento*/}
+                <div className="text-sm">
                   <p className="text-xs text-gray-400 uppercase">Vence</p>
                   <p className="text-sm text-gray-600">{order.due_date ? new Date(order.due_date).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' }) : "Sin fecha"}</p>
                 </div>
-                <div className="border-t my-3"></div>
+
+                
+
+                {/*Prodcuto + Subtotal*/}     
+              <div className="border-t my-3"></div>
                 <div className="space-y-1 mb-3">
                   {order.order_items && order.order_items.length > 0 ? (
                     order.order_items.map((item: any) => (
-                      <div key={item.id} className="flex justify-between text-sm">
+                      <div key={item.id} className="flex justify-between text-base">
                         <span className="text-gray-700">{item.quantity}x {item.product?.name || "Producto"}</span>
-                        <span className="font-medium">${item.subtotal}</span>
+                        <span className="font-medium">${item.subtotal?.toLocaleString('es-CO')}</span>
                       </div>
                     ))
                   ) : (
                     <p className="text-sm text-gray-400">Sin productos</p>
                   )}
                 </div>
+
+                {/*Total de  Precios Prodcutos*/}
                 <div className="border-t my-3"></div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-bold text-gray-700">Total</span>
-                  <span className="text-xl font-bold">${order.total || 0}</span>
+                  <span className="text-lg font-bold text-gray-700">Total</span>
+                  <span className="text-xl font-bold">${order.total?.toLocaleString('es-CO') || 0}</span>
                 </div>
               </CardContent>
             </Card>
           </Link>
         ))}
       </div>
-
+          {/*si no hay productos */}
       {orders.length === 0 && (
         <p className="text-center text-gray-500 mt-10">No hay pedidos{ categoriaSeleccionada ? ` de "${categoriaSeleccionada}"` : '' } aún.</p>
       )}
 
+      {/*eliminar el pedido*/}
       <DeleteDialog
         open={!!deleteOrder}
         onOpenChange={() => setDeleteOrder(null)}

@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "sonner";
 import { fetchAPI, mutateAPI } from "@/lib/api";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Save, Trash2, Plus, X, Pencil, Search } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Plus, X, Pencil, Search, Phone, MailIcon } from "lucide-react";
 import Link from "next/link";
 import DeleteDialog from "../../dialogs/DeleteDialog";
 
@@ -303,10 +303,24 @@ export default function OrderDetailPage() {
             <h1 className="text-2xl lg:text-3xl font-bold">
               {order.order_number || `PED-${order.id}`}
             </h1>
-            <div className="flex gap-2 mt-1">
-              <Badge className={getStatusColor(order.order_status)}>
-                {order.order_status}
-              </Badge>
+            <div className="flex gap-2 mt-1 items-center">
+              {/* ESTADO EN EL ENCABEZADO */}
+              {editing ? (
+                <select
+                  value={orderStatus}
+                  onChange={(e) => setOrderStatus(e.target.value)}
+                  className="border rounded-md p-1 text-sm"
+                >
+                  <option value="pendiente">Pendiente</option>
+                  <option value="pagado">Pagado</option>
+                  <option value="vencido">Vencido</option>
+                  <option value="cancelado">Cancelado</option>
+                </select>
+              ) : (
+                <Badge className={getStatusColor(order.order_status)}>
+                  {order.order_status}
+                </Badge>
+              )}
               {categoryData?.name && (
                 <Badge variant="outline"> {categoryData.name}</Badge>
               )}
@@ -337,190 +351,169 @@ export default function OrderDetailPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* INFORMACIÓN DEL PEDIDO */}
+      <div className="space-y-6">
+        {/* Informacion del pedido */}
         <Card>
           <CardHeader>
             <CardTitle>Información del Pedido</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label>Cliente</Label>
-              <p className="text-lg font-semibold">
-                {clientData?.name || order.client_name || "Sin cliente"}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+  <div>
+    <Label>Cliente</Label>
+    <p className="text-base font-semibold">
+      {clientData?.name || order.client_name || "Sin cliente"}
+    </p>
+  </div>
+  <div>
+    <Label>Teléfono</Label>
+    <p className="text-base font-semibold">
+      {clientData?.phone || "—"}
+    </p>
+  </div>
+  <div>
+    <Label>Email</Label>
+    <p className="text-base font-semibold">
+      {clientData?.email || "—"}
+    </p>
+  </div>
+  <div>
+    <Label>Fecha de Vencimineto</Label>
+    <p className="text-base font-semibold">
+      {order.due_date
+        ? new Date(order.due_date).toLocaleDateString('es-CO', {
+            year: 'numeric', month: 'short', day: 'numeric'
+          })
+        : "Sin fecha"}
+    </p>
+  </div>
+</div>
+             </CardContent>
+        </Card>
+
+        {/* Formulario para agregar pedido */}
+        {editing && (
+          <Card className="border-2 border-dashed border-gray-300 bg-gray-50">
+            <CardHeader>
+              <CardTitle className="text-lg">➕ Agregar Producto al Pedido</CardTitle>
+              <p className="text-sm text-gray-500">
+                Categoría: <Badge variant="outline">📁 {categoryData?.name || "Sin categoría"}</Badge>
               </p>
-              {clientData?.phone && <p className="text-sm text-gray-500">📞 {clientData.phone}</p>}
-              {clientData?.email && <p className="text-sm text-gray-500">📧 {clientData.email}</p>}
-            </div>
-
-            <div>
-              <Label>Estado</Label>
-              {editing ? (
-                <select
-                  value={orderStatus}
-                  onChange={(e) => setOrderStatus(e.target.value)}
-                  className="w-full border rounded-md p-2 mt-1"
-                >
-                  <option value="pendiente">Pendiente</option>
-                  <option value="pagado">Pagado</option>
-                  <option value="vencido">Vencido</option>
-                  <option value="cancelado">Cancelado</option>
-                </select>
-              ) : (
-                <Badge className={getStatusColor(order.order_status)}>
-                  {order.order_status}
-                </Badge>
-              )}
-            </div>
-
-            <div>
-              <Label>Fecha de vencimiento</Label>
-              {editing ? (
-                <Input
-                  type="date"
-                  value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                  className="mt-1"
-                />
-              ) : (
-                <p className="text-sm">
-                  {order.due_date
-                    ? new Date(order.due_date).toLocaleDateString('es-CO', {
-                        year: 'numeric', month: 'long', day: 'numeric'
-                      })
-                    : "Sin fecha"}
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* FORMULARIO PARA AGREGAR PRODUCTO (visible solo en modo edición) */}
-      {editing && (
-        <Card className="mt-6 border-2 border-dashed border-gray-300 bg-gray-50">
-          <CardHeader>
-            <CardTitle className="text-lg"> Agregar Producto al Pedido</CardTitle>
-            <p className="text-sm text-gray-500">
-              Categoría: <Badge variant="outline"> {categoryData?.name || "Sin categoría"}</Badge>
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-              {/* Buscador de producto */}
-              <div className="relative">
-                <Label>Producto</Label>
-                {selectedProduct ? (
-                  <div className="flex items-center justify-between mt-1 p-2 bg-green-50 border border-green-300 rounded-md">
-                    <span className="text-sm font-medium text-green-800 truncate">
-                      {getProductName(selectedProduct)}
-                    </span>
-                    <button
-                      onClick={() => {
-                        setSelectedProduct(null);
-                        setNewProductSearch("");
-                        setNewPrice(0);
-                      }}
-                      className="text-green-600 hover:text-green-800 ml-2"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <div className="relative mt-1">
-                      <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
-                      <Input
-                        type="text"
-                        placeholder="Buscar producto..."
-                        value={newProductSearch}
-                        onChange={(e) => {
-                          setNewProductSearch(e.target.value);
-                          setShowDropdown(true);
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                {/* Buscador de producto */}
+                <div className="relative">
+                  <Label>Producto</Label>
+                  {selectedProduct ? (
+                    <div className="flex items-center justify-between mt-1 p-2 bg-green-50 border border-green-300 rounded-md">
+                      <span className="text-sm font-medium text-green-800 truncate">
+                        {getProductName(selectedProduct)}
+                      </span>
+                      <button
+                        onClick={() => {
+                          setSelectedProduct(null);
+                          setNewProductSearch("");
+                          setNewPrice(0);
                         }}
-                        onFocus={() => setShowDropdown(true)}
-                        className="pl-8"
-                      />
+                        className="text-green-600 hover:text-green-800 ml-2"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
                     </div>
-                    {showDropdown && newProductSearch && (
-                      <div className="absolute z-10 w-full bg-white border rounded-md mt-1 max-h-40 overflow-y-auto shadow-lg">
-                        {filteredBySearch.length > 0 ? (
-                          filteredBySearch.map((product) => {
-                            const pData = product.attributes || product;
-                            return (
-                              <div
-                                key={getProductId(product)}
-                                className="px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm border-b last:border-0"
-                                onClick={() => selectProductForAdd(product)}
-                              >
-                                <p className="font-medium">{pData.name}</p>
-                                <p className="text-xs text-gray-500">${pData.price}</p>
-                              </div>
-                            );
-                          })
-                        ) : (
-                          <div className="px-3 py-2 text-sm text-gray-400">
-                            Sin resultados
-                          </div>
-                        )}
+                  ) : (
+                    <>
+                      <div className="relative mt-1">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+                        <Input
+                          type="text"
+                          placeholder="Buscar producto..."
+                          value={newProductSearch}
+                          onChange={(e) => {
+                            setNewProductSearch(e.target.value);
+                            setShowDropdown(true);
+                          }}
+                          onFocus={() => setShowDropdown(true)}
+                          className="pl-8"
+                        />
                       </div>
-                    )}
-                  </>
-                )}
-              </div>
+                      {showDropdown && newProductSearch && (
+                        <div className="absolute z-10 w-full bg-white border rounded-md mt-1 max-h-40 overflow-y-auto shadow-lg">
+                          {filteredBySearch.length > 0 ? (
+                            filteredBySearch.map((product) => {
+                              const pData = product.attributes || product;
+                              return (
+                                <div
+                                  key={getProductId(product)}
+                                  className="px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm border-b last:border-0"
+                                  onClick={() => selectProductForAdd(product)}
+                                >
+                                  <p className="font-medium">{pData.name}</p>
+                                  <p className="text-xs text-gray-500">${pData.price?.toLocaleString('es-CO')}</p>
+                                </div>
+                              );
+                            })
+                          ) : (
+                            <div className="px-3 py-2 text-sm text-gray-400">
+                              Sin resultados
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
 
-              {/* Cantidad */}
-              <div>
-                <Label>Cantidad</Label>
-                <Input
-                  type="number"
-                  min="1"
-                  value={newQuantity}
-                  onChange={(e) => setNewQuantity(parseInt(e.target.value) || 0)}
-                  className="mt-1"
-                />
-              </div>
+                {/* Cantidad */}
+                <div>
+                  <Label>Cantidad</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={newQuantity}
+                    onChange={(e) => setNewQuantity(parseInt(e.target.value) || 0)}
+                    className="mt-1"
+                  />
+                </div>
 
-              {/* Precio */}
-              <div>
-                <Label>Precio Unitario</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={newPrice}
-                  onChange={(e) => setNewPrice(parseFloat(e.target.value) || 0)}
-                  className="mt-1"
-                />
-              </div>
+                {/* Precio */}
+                <div>
+                  <Label>Precio Unitario</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={newPrice}
+                    onChange={(e) => setNewPrice(parseFloat(e.target.value) || 0)}
+                    className="mt-1"
+                  />
+                </div>
 
-              {/* Botón Agregar */}
-              <div>
-                <Button 
-                  className="w-full"
-                  onClick={confirmAddProduct}
-                  disabled={!selectedProduct}
-                >
-                  <Plus className="h-4 w-4 mr-2" /> Agregar
-                </Button>
+                {/* Botón Agregar */}
+                <div>
+                  <Button 
+                    className="w-full mt-6"
+                    onClick={confirmAddProduct}
+                    disabled={!selectedProduct}
+                  >
+                    <Plus className="h-4 w-4 mr-2" /> Agregar
+                  </Button>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* PRODUCTOS */}
         <Card>
-          <CardHeader>
-            <CardTitle>Productos</CardTitle>
-          </CardHeader>
-          <CardContent>
+           <CardContent>
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Producto</TableHead>
-                  <TableHead>Cant</TableHead>
-                  <TableHead>Precio</TableHead>
-                  <TableHead>Subtotal</TableHead>
+                <TableRow>        
+                  <TableHead className="text-lg text-gray-700 font-semibold">Productos</TableHead>
+                  <TableHead className="text-lg text-gray-700 font-semibold">Cant</TableHead>
+                  <TableHead className="text-lg text-gray-700 font-semibold">Precio</TableHead>
+                  <TableHead className="text-lg text-gray-700 font-semibold">Subtotal</TableHead>
                   {editing && <TableHead></TableHead>}
                 </TableRow>
               </TableHeader>
@@ -557,11 +550,11 @@ export default function OrderDetailPage() {
                             className="w-24"
                           />
                         ) : (
-                          `$${item.unit_price}`
+                          `$${item.unit_price?.toLocaleString('es-CO')}`
                         )}
                       </TableCell>
                       <TableCell className="font-medium">
-                        ${item.subtotal || 0}
+                        ${(item.subtotal || 0)?.toLocaleString('es-CO')}
                       </TableCell>
                       {editing && (
                         <TableCell>
@@ -588,9 +581,9 @@ export default function OrderDetailPage() {
             </Table>
 
             <div className="border-t mt-4 pt-4 text-right">
-              <p className="text-sm text-gray-500">Total</p>
+              <p className="text-base text-gray-700 font-bold">Total</p>
               <p className="text-3xl font-bold">
-                ${editing ? calculateTotal() : (order.total || 0)}
+                ${(editing ? calculateTotal() : (order.total || 0))?.toLocaleString('es-CO')} COP
               </p>
             </div>
           </CardContent>

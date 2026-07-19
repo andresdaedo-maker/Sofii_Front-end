@@ -121,7 +121,7 @@ export default function ClientsPage() {
           className="max-w-md"
         />
       </div>
-
+       {/* tabla de clientes*/}
       <Card>
         <CardContent className="p-0">
           <Table>

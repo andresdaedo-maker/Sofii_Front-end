@@ -169,8 +169,8 @@ export default function NewOrderPage() {
               <div className="mb-4 p-3 bg-gray-50 rounded-lg border">
                 <Label className="mb-2 block">Filtrar por categoría</Label>
                 <select value={selectedCategory} onChange={(e) => { setSelectedCategory(e.target.value); setSelectedProduct(null); setSearchProduct(""); setEditPrice(""); }} className="w-full border rounded-md p-2 bg-white">
-                  <option value="">📋 Todas las categorías</option>
-                  {categories.map((cat) => (<option key={cat.id} value={cat.name}>📁 {cat.name}</option>))}
+                  <option value=""> Todas las categorías</option>
+                  {categories.map((cat) => (<option key={cat.id} value={cat.name}> {cat.name}</option>))}
                 </select>
               </div>
               <div className="space-y-3">
@@ -219,7 +219,7 @@ export default function NewOrderPage() {
               </Table>
               <p className="text-2xl font-bold text-right mt-4">Total: ${total.toFixed(2)}</p>
             </div>
-            <Button onClick={saveOrder} disabled={loading} className="w-full mt-4">{loading ? "Guardando..." : "💾 Guardar Pedido"}</Button>
+            <Button onClick={saveOrder} disabled={loading} className="w-full mt-4">{loading ? "Guardando..." : " Guardar Pedido"}</Button>
           </CardContent>
         </Card>
       </div>
