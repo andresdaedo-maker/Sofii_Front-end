@@ -9,13 +9,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { fetchAPI, mutateAPI } from "@/lib/api";
-import { Plus, Pencil, Trash } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
+import DeleteDialog from "../dialogs/DeleteDialog";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<any>(null);
+  const [deleteCategory, setDeleteCategory] = useState<any>(null);
   
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -25,7 +27,7 @@ export default function CategoriesPage() {
   }, []);
 
   const loadCategories = async () => {
-    const data = await fetchAPI('/categories');
+    const data = await fetchAPI('/categories?pagination[pageSize]=1000');
     setCategories(Array.isArray(data.data) ? data.data : []);
   };
 
@@ -83,12 +85,17 @@ export default function CategoriesPage() {
     }
   };
 
-  const deleteCategory = async (category: any) => {
-    if (!confirm("¿Eliminar esta categoría?")) return;
+  const handleDeleteClick = (category: any) => {
+    setDeleteCategory(category);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteCategory) return;
     try {
-      const categoryId = getCategoryId(category);
+      const categoryId = deleteCategory.documentId || deleteCategory.id;
       await mutateAPI(`/categories/${categoryId}`, 'DELETE');
       toast.success("Categoría eliminada");
+      setDeleteCategory(null);
       loadCategories();
     } catch (error) {
       toast.error("Error al eliminar");
@@ -98,7 +105,7 @@ export default function CategoriesPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl lg:text-3xl font-bold">Categorías</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold dark:text-white">Categorías</h1>
         <Button onClick={openCreate}>
           <Plus className="mr-2 h-4 w-4" /> Nueva Categoría
         </Button>
@@ -118,16 +125,16 @@ export default function CategoriesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Descripción</TableHead>
-                <TableHead>Fecha de creación</TableHead>
-                <TableHead>Acciones</TableHead>
+                <TableHead className="text-lg font-bold text-black dark:text-white">Nombre</TableHead>
+                <TableHead className="text-lg font-bold text-black dark:text-white">Descripción</TableHead>
+                <TableHead className="text-lg font-bold text-black dark:text-white">Fecha de creación</TableHead>
+                <TableHead className="text-lg font-bold text-black dark:text-white">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredCategories.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-gray-400 py-8">
+                  <TableCell colSpan={4} className="text-center text-gray-400 dark:text-gray-500 py-8">
                     No se encontraron categorías
                   </TableCell>
                 </TableRow>
@@ -135,10 +142,10 @@ export default function CategoriesPage() {
                 filteredCategories.map((category: any) => (
                   <TableRow key={category.id}>
                     <TableCell className="font-medium">{category.name}</TableCell>
-                    <TableCell className="text-sm text-gray-600">
+                    <TableCell className="text-sm text-gray-600 dark:text-gray-400">
                       {category.description || "Sin descripción"}
                     </TableCell>
-                    <TableCell className="text-sm text-gray-600">
+                    <TableCell className="text-sm text-gray-600 dark:text-gray-400">
                       {new Date(category.createdAt).toLocaleDateString('es-CO', {
                         year: 'numeric',
                         month: 'long',
@@ -150,8 +157,8 @@ export default function CategoriesPage() {
                         <Button variant="ghost" size="icon" onClick={() => openEdit(category)}>
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => deleteCategory(category)}>
-                          <Trash className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(category)}>
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>
@@ -193,6 +200,14 @@ export default function CategoriesPage() {
           </div>
         </DialogContent>
       </Dialog>
+      
+      <DeleteDialog
+        open={!!deleteCategory}
+        onOpenChange={() => setDeleteCategory(null)}
+        itemType="categoría"
+        itemName={deleteCategory?.name}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

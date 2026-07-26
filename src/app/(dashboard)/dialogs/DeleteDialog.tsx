@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -12,8 +13,10 @@ import { Button } from "@/components/ui/button";
 interface DeleteDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  title: string;
-  message: string;
+  title?: string;
+  message?: string;
+  itemName?: string;
+  itemType?: string; // "pedido", "cliente", "producto", "categoría"
   onConfirm: () => void;
 }
 
@@ -22,17 +25,20 @@ export default function DeleteDialog({
   onOpenChange,
   title,
   message,
+  itemName,
+  itemType = "elemento",
   onConfirm,
 }: DeleteDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle>{title || `Eliminar ${itemType}`}</DialogTitle>
+          <DialogDescription>
+            {message || `¿Estás seguro de eliminar ${itemName ? `"${itemName}"` : `este ${itemType}`}? Esta acción no se puede deshacer.`}
+          </DialogDescription>
         </DialogHeader>
-        <p className="text-gray-600">{message}</p>
-        <p className="text-sm text-red-500">Esta acción no se puede deshacer.</p>
-        <DialogFooter className="gap-2">
+        <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>

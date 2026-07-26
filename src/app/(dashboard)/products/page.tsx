@@ -10,7 +10,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { fetchAPI, mutateAPI } from "@/lib/api";
-import { Plus, Pencil, Search, Trash, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
+import DeleteDialog from "../dialogs/DeleteDialog";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -19,6 +20,7 @@ export default function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [open, setOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [deleteProduct, setDeleteProduct] = useState<any>(null);
   
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
@@ -26,7 +28,7 @@ export default function ProductsPage() {
   const [categoryId, setCategoryId] = useState("");
   const [active, setActive] = useState(true);
 
-  const [currentPage,setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const PAGE_SIZE = 30;
 
@@ -36,10 +38,9 @@ export default function ProductsPage() {
   }, [currentPage, selectedCategory]);
 
   const loadProducts = async () => {
-
     let url = `/products?populate=*&pagination[page]=${currentPage}&pagination[pageSize]=${PAGE_SIZE}`;
 
-    if  (selectedCategory) {
+    if (selectedCategory) {
       const cat = categories.find(c => c.name === selectedCategory);
       if (cat) {
         url += `&filters[categories][id][$eq]=${cat.id}`;
@@ -50,14 +51,13 @@ export default function ProductsPage() {
 
     if (data.data) {
       setProducts(Array.isArray(data.data) ? data.data : []);
-
-    const total = data.meta?.pagination?.total || 0;
-    setTotalPages(Math.ceil(total / PAGE_SIZE));
+      const total = data.meta?.pagination?.total || 0;
+      setTotalPages(Math.ceil(total / PAGE_SIZE));
     }
   };
 
   const loadCategories = async () => {
-    const data = await fetchAPI('/categories?');
+    const data = await fetchAPI('/categories?pagination[pageSize]=1000');
     setCategories(Array.isArray(data.data) ? data.data : []);
   };
 
@@ -170,12 +170,17 @@ export default function ProductsPage() {
     }
   };
 
-  const deleteProduct = async (product: any) => {
-    if (!confirm("¿Eliminar este producto?")) return;
+  const handleDeleteClick = (product: any) => {
+    setDeleteProduct(product);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteProduct) return;
     try {
-      const productId = getProductId(product);
+      const productId = getProductId(deleteProduct);
       await mutateAPI(`/products/${productId}`, 'DELETE');
       toast.success("Producto eliminado");
+      setDeleteProduct(null);
       loadProducts();
     } catch (error) {
       toast.error("Error al eliminar");
@@ -185,7 +190,7 @@ export default function ProductsPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl lg:text-3xl font-bold">Productos</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold dark:text-white">Productos</h1>
         <Button onClick={openCreate}>
           <Plus className="mr-2 h-4 w-4" /> Nuevo Producto
         </Button>
@@ -204,7 +209,7 @@ export default function ProductsPage() {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full sm:w-64 border rounded-md p-2"
+            className="w-full sm:w-64 border rounded-md p-2 dark:bg-gray-800 dark:text-white dark:border-gray-600"
           >
             <option value="">Todas las categorías</option>
             {categories.map((cat) => (
@@ -221,19 +226,19 @@ export default function ProductsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Producto</TableHead>
-                <TableHead>Categoría</TableHead>
-                <TableHead>Precio</TableHead>
-                <TableHead>Stock</TableHead>
-                <TableHead>Fecha de Registro</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Acciones</TableHead>
+                <TableHead className="text-lg font-bold text-black dark:text-white">Producto</TableHead>
+                <TableHead className="text-lg font-bold text-black dark:text-white">Categoría</TableHead>
+                <TableHead className="text-lg font-bold text-black dark:text-white">Precio</TableHead>
+                <TableHead className="text-lg font-bold text-black dark:text-white">Stock</TableHead>
+                <TableHead className="text-lg font-bold text-black dark:text-white">Fecha de Registro</TableHead>
+                <TableHead className="text-lg font-bold text-black dark:text-white">Estado</TableHead>
+                <TableHead className="text-lg font-bold text-black dark:text-white">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-gray-400 py-8">
+                  <TableCell colSpan={7} className="text-center text-gray-400 dark:text-gray-500 py-8">
                     No se encontraron productos
                   </TableCell>
                 </TableRow>
@@ -242,18 +247,18 @@ export default function ProductsPage() {
                   <TableRow key={product.id}>
                     <TableCell className="font-medium">{product.name}</TableCell>
                     <TableCell>{getCategoryName(product)}</TableCell>
-                    <TableCell>${product.price.toLocaleString()}</TableCell>
+                    <TableCell>${product.price?.toLocaleString()}</TableCell>
                     <TableCell>
                       <Badge variant={product.stock > 10 ? "default" : product.stock > 0 ? "secondary" : "destructive"}>
                         {product.stock}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-sm text-gray-600">
+                    <TableCell className="text-sm text-gray-600 dark:text-gray-400">
                       {new Date(product.createdAt).toLocaleDateString('es-CO', {
                         year: 'numeric',
                         month: 'short',
                         day: 'numeric'
-                        })}
+                      })}
                     </TableCell>
                     <TableCell>
                       <button onClick={() => toggleActive(product)}>
@@ -267,7 +272,7 @@ export default function ProductsPage() {
                         <Button variant="ghost" size="icon" onClick={() => openEdit(product)}>
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => deleteProduct(product)}>
+                        <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(product)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -276,49 +281,49 @@ export default function ProductsPage() {
                 ))
               )}
             </TableBody>
-                      </Table>
+          </Table>
             
-            {/* PAGINACIÓN */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between px-4 py-3 border-t">
-                <p className="text-sm text-gray-500">
-                  Página {currentPage} de {totalPages}
-                </p>
-                <div className="flex gap-1">
+          {/* Paginacion */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t dark:border-gray-700">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Página {currentPage} de {totalPages}
+              </p>
+              <div className="flex gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  ← Anterior
+                </Button>
+                
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                   <Button
-                    variant="outline"
+                    key={page}
+                    variant={currentPage === page ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setCurrentPage(currentPage - 1)}
-                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(page)}
+                    className="w-10"
                   >
-                    ← Anterior
+                    {page}
                   </Button>
-                  
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <Button
-                      key={page}
-                      variant={currentPage === page ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setCurrentPage(page)}
-                      className="w-10"
-                    >
-                      {page}
-                    </Button>
-                  ))}
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                  >
-                    Siguiente →
-                  </Button>
-                </div>
+                ))}
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  Siguiente →
+                </Button>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
@@ -347,7 +352,7 @@ export default function ProductsPage() {
               <select
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
-                className="w-full border rounded-md p-2"
+                className="w-full border rounded-md p-2 dark:bg-gray-800 dark:text-white dark:border-gray-600"
               >
                 <option value="">Sin categoría</option>
                 {categories.map((cat) => (
@@ -372,6 +377,14 @@ export default function ProductsPage() {
           </div>
         </DialogContent>
       </Dialog>
+      
+      <DeleteDialog
+        open={!!deleteProduct}
+        onOpenChange={() => setDeleteProduct(null)}
+        itemType="producto"
+        itemName={deleteProduct?.name}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

@@ -11,12 +11,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { toast } from "sonner";
 import { fetchAPI, mutateAPI } from "@/lib/api";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import DeleteDialog from "../dialogs/DeleteDialog";
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<any>(null);
+  const [deleteClient, setDeleteClient] = useState<any>(null);
   
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -28,7 +30,8 @@ export default function ClientsPage() {
   }, []);
 
   const loadClients = async () => {
-    const data = await fetchAPI('/clients');
+    const data = await fetchAPI('/clients?pagination[limit]=1000');
+    console.log(" Clientes cargados:", data.data?.length);
     setClients(Array.isArray(data.data) ? data.data : []);
   };
 
@@ -36,11 +39,12 @@ export default function ClientsPage() {
     return client.documentId || client.id;
   };
 
-  const filteredClients = clients.filter((client: any) =>
-    client.name.toLowerCase().includes(search.toLowerCase()) ||
-    (client.email || "").toLowerCase().includes(search.toLowerCase()) ||
-    (client.phone || "").includes(search)
-  );
+  const filteredClients = clients.filter((client: any) => {
+    const nameMatch = (client.name || "").toLowerCase().includes(search.toLowerCase());
+    const emailMatch = (client.email || "").toLowerCase().includes(search.toLowerCase());
+    const phoneMatch = (client.phone || "").includes(search);
+    return nameMatch || emailMatch || phoneMatch;
+  });
 
   const resetForm = () => {
     setName("");
@@ -92,12 +96,17 @@ export default function ClientsPage() {
     }
   };
 
-  const deleteClient = async (client: any) => {
-    if (!confirm("¿Eliminar este cliente?")) return;
+  const handleDeleteClick = (client: any) => {
+    setDeleteClient(client);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteClient) return;
     try {
-      const clientId = getClientId(client);
+      const clientId = getClientId(deleteClient);
       await mutateAPI(`/clients/${clientId}`, 'DELETE');
       toast.success("Cliente eliminado");
+      setDeleteClient(null);
       loadClients();
     } catch (error) {
       toast.error("Error al eliminar");
@@ -107,7 +116,7 @@ export default function ClientsPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl lg:text-3xl font-bold">Clientes</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold dark:text-white">Clientes</h1>
         <Button onClick={openCreate}>
           <Plus className="mr-2 h-4 w-4" /> Nuevo Cliente
         </Button>
@@ -121,24 +130,24 @@ export default function ClientsPage() {
           className="max-w-md"
         />
       </div>
-       {/* tabla de clientes*/}
+      
       <Card>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Teléfono</TableHead>
-                <TableHead>Dirección</TableHead>
-                <TableHead>Fecha registro</TableHead>
-                <TableHead>Acciones</TableHead>
+                <TableHead className="text-lg font-bold text-black dark:text-white">Nombre</TableHead>
+                <TableHead className="text-lg font-bold text-black dark:text-white">Email</TableHead>
+                <TableHead className="text-lg font-bold text-black dark:text-white">Teléfono</TableHead>
+                <TableHead className="text-lg font-bold text-black dark:text-white">Dirección</TableHead>
+                <TableHead className="text-lg font-bold text-black dark:text-white">Fecha registro</TableHead>
+                <TableHead className="text-lg font-bold text-black dark:text-white">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredClients.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-gray-400 py-8">
+                  <TableCell colSpan={6} className="text-center text-gray-400 dark:text-gray-500 py-8">
                     No se encontraron clientes
                   </TableCell>
                 </TableRow>
@@ -148,10 +157,10 @@ export default function ClientsPage() {
                     <TableCell className="font-medium">{client.name}</TableCell>
                     <TableCell className="text-sm">{client.email || "—"}</TableCell>
                     <TableCell className="text-sm">{client.phone || "—"}</TableCell>
-                    <TableCell className="text-sm text-gray-600">
+                    <TableCell className="text-sm text-gray-600 dark:text-gray-400">
                       {client.address || "Sin dirección"}
                     </TableCell>
-                    <TableCell className="text-sm text-gray-600">
+                    <TableCell className="text-sm text-gray-600 dark:text-gray-400">
                       {new Date(client.createdAt).toLocaleDateString('es-CO', {
                         year: 'numeric',
                         month: 'short',
@@ -163,7 +172,7 @@ export default function ClientsPage() {
                         <Button variant="ghost" size="icon" onClick={() => openEdit(client)}>
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => deleteClient(client)}>
+                        <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(client)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -175,6 +184,14 @@ export default function ClientsPage() {
           </Table>
         </CardContent>
       </Card>
+
+      <DeleteDialog
+        open={!!deleteClient}
+        onOpenChange={() => setDeleteClient(null)}
+        itemType="cliente"
+        itemName={deleteClient?.name}
+        onConfirm={confirmDelete}
+      />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>

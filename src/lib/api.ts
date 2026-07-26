@@ -24,7 +24,7 @@ export async function mutateAPI(endpoint: string, method: string = 'POST', body?
     const res = await fetch(`${API_URL}${endpoint}`, {
       method,
       headers: getHeaders(),
-      body: body ? JSON.stringify(body) : undefined,
+      body: body ? JSON.stringify({ data: body }) : undefined,
     });
     
     const text = await res.text();

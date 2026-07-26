@@ -34,11 +34,15 @@ export interface OrderItem {
 export interface Order {
   id: number;
   documentId?: string;
-  client_name: string;
-  order_number: string;
-  due_date: string;
-  order_status: 'pendiente' | 'pagado' | 'vencido' | 'cancelado';
+  order_number?: string;
+  client_name?: string;
+  due_date?: string;
+  order_status: string;
   total: number;
+  observaciones?: string;
   client?: Client;
-  order_items?: OrderItem[];
+  category?: Category;
+  product_items?: OrderItem[];
+  createdAt?: string;
+  updatedAt?: string;
 }

@@ -8,7 +8,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm text-gray-500">Pedidos Hoy</CardTitle>
+            <CardTitle className="text-sm text-gray-500">Pedidos General</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">0</p>
@@ -17,7 +17,7 @@ export default function DashboardPage() {
         
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm text-gray-500">Pendientes</CardTitle>
+            <CardTitle className="text-sm text-gray-500">Pedidos Pendientes</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-yellow-600">0</p>
@@ -33,14 +33,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm text-gray-500">Egresos del Mes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-red-600">$0.00</p>
-          </CardContent>
-        </Card>
+        
 
         {/* grafico de area */}
         
