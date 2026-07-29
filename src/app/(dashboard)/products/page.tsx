@@ -335,16 +335,27 @@ export default function ProductsPage() {
           <div className="space-y-4">
             <div>
               <Label>Nombre del producto</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej: Pizza Grande" />
+              <Input 
+                value={name} 
+                onChange={(e) => setName(e.target.value)} 
+                placeholder="Ej: Pizza Grande" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Precio</Label>
-                <Input type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="0.00" />
+                <Input 
+                  type="number" 
+                  value={price} 
+                  onChange={(e) => setPrice(e.target.value)} 
+                  placeholder="0.00" />
               </div>
               <div>
                 <Label>Stock</Label>
-                <Input type="number" value={stock} onChange={(e) => setStock(e.target.value)} placeholder="0" />
+                <Input 
+                  type="number" 
+                  value={stock} 
+                  onChange={(e) => setStock(e.target.value)} 
+                  placeholder="0" />
               </div>
             </div>
             <div>

@@ -16,7 +16,7 @@ interface DeleteDialogProps {
   title?: string;
   message?: string;
   itemName?: string;
-  itemType?: string; // "pedido", "cliente", "producto", "categoría"
+  itemType?: string; 
   onConfirm: () => void;
 }
 

@@ -142,7 +142,7 @@ export default function OrderDetailPage() {
   };
   
  const cancelEditing = () => { 
-  router.push("/orders"); // ← Agrega esto directamente
+  router.push("/orders"); 
 };
 
   const resetToOriginal = () => {
@@ -153,7 +153,7 @@ export default function OrderDetailPage() {
   resetAddForm(); 
   setEditing(false);
   setShowSaveConfirm(false);
-  router.push("/orders"); // ← Agrega esto
+  router.push("/orders"); 
 };
 
   const resetAddForm = () => { 
@@ -206,9 +206,9 @@ export default function OrderDetailPage() {
     return orderItems.reduce((sum, item) => sum + (item.subtotal || 0), 0); 
   };
 
-  const handleSave = async () => {
   // Si está cambiando a pagado, mostrar confirmación primero
-  if (orderStatus === 'pagado' && order?.order_status !== 'pagado') {
+    const handleSave = async () => {
+    if (orderStatus === 'pagado' && order?.order_status !== 'pagado') {
     setShowPayConfirm(true);
     return;
   }
@@ -237,7 +237,7 @@ const saveChanges = async () => {
 
     await mutateAPI(`/orders/${orderId}`, 'PUT', updateData);
 
-    // Guardar en PaidRegister si es pagado
+    
     if (orderStatus === 'pagado') {
       const catData = order.category?.attributes || order.category || {};
       const cliData = order.client?.attributes || order.client || {};
@@ -278,8 +278,15 @@ const saveChanges = async () => {
   setShowDelete(false); 
 };
 
-  if (loading) return <div className="flex items-center justify-center h-64"><p className="text-gray-500 dark:text-gray-400">Cargando pedido...</p></div>;
-  if (!order) return <div className="text-center py-12"><p className="text-gray-500 dark:text-gray-400">Pedido no encontrado</p><Link href="/orders" className="text-blue-500 hover:underline mt-4 inline-block">Volver a pedidos</Link></div>;
+  if (loading) return 
+  <div className="flex items-center justify-center h-64">
+    <p className="text-gray-500 dark:text-gray-400">Cargando pedido...</p>
+    </div>;
+  if (!order) return 
+  <div className="text-center py-12">
+    <p className="text-gray-500 dark:text-gray-400">Pedido no encontrado</p>
+    <Link href="/orders" className="text-blue-500 hover:underline mt-4 inline-block">Volver a pedidos</Link>
+    </div>;
 
   const clientData = order.client?.attributes || order.client || {};
   const categoryData = order.category?.attributes || order.category || {};
@@ -321,16 +328,31 @@ const saveChanges = async () => {
       </div>
       
       <div className="space-y-6">
-        <Card><CardHeader><CardTitle>Información del Pedido</CardTitle></CardHeader>
+        <Card>
+          <CardHeader>
+            <CardTitle>Información del Pedido</CardTitle>
+            </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div><Label>Cliente</Label><p className="text-base font-semibold dark:text-white">{clientData?.name || order.client_name || "Sin cliente"}</p></div>
-              <div><Label>Teléfono</Label><p className="text-base font-semibold dark:text-white">{clientData?.phone || "—"}</p></div>
-              <div><Label>Email</Label><p className="text-base font-semibold dark:text-white">{clientData?.email || "—"}</p></div>
-              <div><Label>Fecha de Vencimiento</Label><p className="text-base font-semibold dark:text-white">{order.due_date ? new Date(order.due_date).toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: 'numeric' }) : "Sin fecha"}</p></div>
+              <div>
+                <Label>Cliente</Label><p className="text-base font-semibold dark:text-white">{clientData?.name || order.client_name || "Sin cliente"}</p>
+                </div>
+              <div>
+                <Label>Teléfono</Label><p className="text-base font-semibold dark:text-white">{clientData?.phone || "—"}</p>
+                </div>
+              <div>
+                <Label>Email</Label><p className="text-base font-semibold dark:text-white">{clientData?.email || "—"}</p>
+              </div>
+              <div>
+                <Label>Fecha de Vencimiento</Label><p className="text-base font-semibold dark:text-white">{order.due_date ? new Date(order.due_date).toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: 'numeric' }) : "Sin fecha"}</p>
+                </div>
               <div className="flex items-center gap-2">
                 {editing ? (
-                  <select value={orderStatus} onChange={(e) => setOrderStatus(e.target.value)} className="border rounded-md p-1 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-600">
+                  <select 
+                    value={orderStatus} 
+                    onChange={(e) => setOrderStatus(e.target.value)} 
+                    className="border rounded-md p-1 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-600"
+                    >
                     <option value="pendiente">Pendiente</option>
                     <option value="pagado">Pagado</option>
                   </select>
@@ -345,68 +367,186 @@ const saveChanges = async () => {
 
         {editing && (
   <Card className="border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 overflow-visible">
-            <CardHeader><CardTitle className="text-lg dark:text-white">+ Agregar Producto al Pedido</CardTitle><p className="text-sm text-gray-500 dark:text-gray-400">Categoría: <Badge variant="outline"> {categoryData?.name || "Sin categoría"}</Badge></p></CardHeader>
+            <CardHeader>
+              <CardTitle className="text-lg dark:text-white">+ Agregar Producto al Pedido</CardTitle>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Categoría: 
+                <Badge variant="outline"> {categoryData?.name || "Sin categoría"}</Badge>
+                </p>
+              </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                <div className="relative"><Label>Producto</Label>
+                <div className="relative">
+                  <Label>Producto</Label>
                   {selectedProduct ? (
-                    <div className="flex items-center justify-between mt-1 p-2 bg-green-50 dark:bg-green-900/30 border border-green-300 dark:border-green-700 rounded-md"><span className="text-sm font-medium text-green-800 dark:text-green-300 truncate">{getProductName(selectedProduct)}</span><button onClick={() => { setSelectedProduct(null); setNewProductSearch(""); setNewPrice(0); }} className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200 ml-2"><X className="h-4 w-4" /></button></div>
+                    <div className="flex items-center justify-between mt-1 p-2 bg-green-50 dark:bg-green-900/30 border border-green-300 dark:border-green-700 rounded-md">
+                      <span className="text-sm font-medium text-green-800 dark:text-green-300 truncate">{getProductName(selectedProduct)}</span>
+                      <button 
+                      onClick={() => { setSelectedProduct(null); setNewProductSearch(""); setNewPrice(0); }} 
+                      className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200 ml-2">
+                        <X className="h-4 w-4" />
+                        </button>
+                        </div>
                   ) : (
-                    <><div className="relative mt-1"><Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" /><Input type="text" placeholder="Buscar producto..." value={newProductSearch} onChange={(e) => { setNewProductSearch(e.target.value); setShowDropdown(true); }} onFocus={() => setShowDropdown(true)} className="pl-8" /></div>
+                    <>
+                    <div className="relative mt-1">
+                      <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+                      <Input 
+                      type="text" 
+                      placeholder="Buscar producto..." 
+                      value={newProductSearch} 
+                      onChange={(e) => { setNewProductSearch(e.target.value); setShowDropdown(true); }} 
+                      onFocus={() => setShowDropdown(true)} 
+                      className="pl-8" />
+                      </div>
                     {showDropdown && newProductSearch && (
                       <div className="absolute z-50 w-full bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-md mt-1 max-h-40 overflow-y-auto shadow-lg">
-                        {filteredBySearch.length > 0 ? filteredBySearch.map((product) => { const pData = product.attributes || product; return <div key={getProductId(product)} className="px-3 py-2 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer text-sm border-b dark:border-gray-700 last:border-0" onClick={() => selectProductForAdd(product)}><p className="font-medium">{pData.name}</p><p className="text-xs text-gray-500 dark:text-gray-400">${pData.price?.toLocaleString('es-CO')}</p></div>; }) : <div className="px-3 py-2 text-sm text-gray-400 dark:text-gray-500">Sin resultados</div>}
-                      </div>
-                    )}</>
-                  )}
+                        {filteredBySearch.length > 0 ? filteredBySearch.map((product) => { const pData = product.attributes || product; 
+                          return <div 
+                                   key={getProductId(product)} 
+                                    className="px-3 py-2 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer text-sm border-b dark:border-gray-700 last:border-0" 
+                                     onClick={() => selectProductForAdd(product)}>
+                                      <p className="font-medium">{pData.name}</p>
+                                       <p className="text-xs text-gray-500 dark:text-gray-400">${pData.price?.toLocaleString('es-CO')}</p></div>; }) : 
+                                    <div className="px-3 py-2 text-sm text-gray-400 dark:text-gray-500">Sin resultados</div>}
+                                 </div>
+                             )}</>
+                          )}
                 </div>
-                <div><Label>Cantidad</Label><Input type="number" min="1" value={newQuantity} onChange={(e) => setNewQuantity(parseInt(e.target.value) || 0)} className="mt-1" /></div>
-                <div><Label>Precio Unitario</Label><Input type="number" step="0.01" min="0" value={newPrice} onChange={(e) => setNewPrice(parseFloat(e.target.value) || 0)} className="mt-1" /></div>
-                <div><Button className="w-full mt-6" onClick={confirmAddProduct} disabled={!selectedProduct}><Plus className="h-4 w-4 mr-2" /> Agregar</Button></div>
+                <div>
+                  <Label>Cantidad</Label>
+                   <Input 
+                     type="number" 
+                     min="1" 
+                     value={newQuantity} 
+                     onChange={(e) => setNewQuantity(parseInt(e.target.value) || 0)} 
+                     className="mt-1" />
+                     </div>
+                <div>
+                  <Label>Precio Unitario</Label>
+                  <Input 
+                  type="number" 
+                  step="0.01" 
+                  min="0" 
+                  value={newPrice} 
+                  onChange={(e) => setNewPrice(parseFloat(e.target.value) || 0)} 
+                  className="mt-1" />
+                  </div>
+                <div>
+                  <Button 
+                  className="w-full mt-6" 
+                  onClick={confirmAddProduct} 
+                  disabled={!selectedProduct}>
+                    <Plus className="h-4 w-4 mr-2" /> Agregar</Button></div>
               </div>
             </CardContent>
           </Card>
         )}
 
-        <Card><CardContent className="pt-6"><div><Label>Observaciones</Label>{editing ? <textarea value={observaciones} onChange={(e) => setObservaciones(e.target.value)} className="w-full border rounded-md p-2 mt-1 min-h-[80px] dark:bg-gray-800 dark:text-white dark:border-gray-600" rows={3} placeholder="Notas del pedido..." /> : <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{order.observaciones || "Sin observaciones"}</p>}</div></CardContent></Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div>
+              <Label>Observaciones</Label>
+              {editing ? 
+              <textarea 
+              value={observaciones} 
+              onChange={(e) => setObservaciones(e.target.value)} 
+              className="w-full border rounded-md p-2 mt-1 min-h-[80px] dark:bg-gray-800 dark:text-white dark:border-gray-600" 
+              rows={3} 
+              placeholder="Notas del pedido..." /> : 
+              <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{order.observaciones || "Sin observaciones"}</p>}
+              </div>
+            </CardContent>
+          </Card>
 
-        <Card><CardContent className="pt-6">
+        <Card>
+          <CardContent className="pt-6">
           <Table>
-            <TableHeader><TableRow><TableHead className="text-lg text-gray-700 dark:text-gray-300 font-semibold">Productos</TableHead><TableHead className="text-lg text-gray-700 dark:text-gray-300 font-semibold">Cant</TableHead><TableHead className="text-lg text-gray-700 dark:text-gray-300 font-semibold">Precio</TableHead><TableHead className="text-lg text-gray-700 dark:text-gray-300 font-semibold">Subtotal</TableHead>{editing && <TableHead></TableHead>}</TableRow></TableHeader>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-lg text-gray-700 dark:text-gray-300 font-semibold">Productos</TableHead>
+                <TableHead className="text-lg text-gray-700 dark:text-gray-300 font-semibold">Cant</TableHead>
+                <TableHead className="text-lg text-gray-700 dark:text-gray-300 font-semibold">Precio</TableHead>
+                <TableHead className="text-lg text-gray-700 dark:text-gray-300 font-semibold">Subtotal</TableHead>
+                {editing && <TableHead>
+                    </TableHead>}
+                    </TableRow>
+                  </TableHeader>
             <TableBody>
               {orderItems.length > 0 ? orderItems.map((item: any, index: number) => (
                 <TableRow key={item.id || index}>
-                  <TableCell><p className="font-medium">{getProductName(item.product)}</p></TableCell>
-                  <TableCell>{editing ? <Input type="number" min="1" value={item.quantity} onChange={(e) => updateOrderItem(index, 'quantity', parseInt(e.target.value) || 0)} className="w-20" /> : item.quantity}</TableCell>
-                  <TableCell>{editing ? <Input type="number" step="0.01" min="0" value={item.unit_price} onChange={(e) => updateOrderItem(index, 'unit_price', parseFloat(e.target.value) || 0)} className="w-24" /> : `$${item.unit_price?.toLocaleString('es-CO')}`}</TableCell>
+                  <TableCell><p className="font-medium">{getProductName(item.product)}
+                    </p>
+                    </TableCell>
+                  <TableCell>
+                    {editing ? 
+                     <Input 
+                      type="number" 
+                      min="1" 
+                      value={item.quantity} 
+                      onChange={(e) => updateOrderItem(index, 'quantity', parseInt(e.target.value) || 0)} 
+                      className="w-20" /> : item.quantity}
+                  </TableCell>
+                  <TableCell>
+                    {editing ? 
+                     <Input 
+                       type="number" 
+                       step="0.01" 
+                       min="0" 
+                       value={item.unit_price} 
+                       onChange={(e) => updateOrderItem(index, 'unit_price', parseFloat(e.target.value) || 0)} 
+                       className="w-24" /> : `$${item.unit_price?.toLocaleString('es-CO')}`}
+                    </TableCell>
                   <TableCell className="font-medium">${(item.subtotal || 0)?.toLocaleString('es-CO')}</TableCell>
-                  {editing && <TableCell><Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950" onClick={() => removeOrderItem(index)}><Trash2 className="h-4 w-4" /></Button></TableCell>}
+                  {editing && 
+                  <TableCell>
+                    <Button 
+                     variant="ghost" 
+                     size="icon" 
+                     className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950" 
+                     onClick={() => removeOrderItem(index)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TableCell>}
                 </TableRow>
-              )) : <TableRow><TableCell colSpan={editing ? 5 : 4} className="text-center text-gray-400 dark:text-gray-500">No hay productos</TableCell></TableRow>}
+              )) : 
+              <TableRow><TableCell colSpan={editing ? 5 : 4} className="text-center text-gray-400 dark:text-gray-500">No hay productos</TableCell>
+              </TableRow>
+              }
             </TableBody>
           </Table>
-          <div className="border-t dark:border-gray-700 mt-4 pt-4 text-right"><p className="text-base text-gray-700 dark:text-gray-300 font-bold">Total</p><p className="text-3xl font-bold dark:text-white">${(editing ? calculateTotal() : (order.total || 0))?.toLocaleString('es-CO')} COP</p></div>
-        </CardContent></Card>
+          <div className="border-t dark:border-gray-700 mt-4 pt-4 text-right">
+            <p className="text-base text-gray-700 dark:text-gray-300 font-bold">Total</p>
+            <p className="text-3xl font-bold dark:text-white">
+              ${(editing ? calculateTotal() : (order.total || 0))?.toLocaleString('es-CO')} COP</p>
+              </div>
+        </CardContent>
+        </Card>
       </div>
 
-{/* Diálogo de confirmación para eliminar */}
-      <DeleteDialog open={showDelete} onOpenChange={setShowDelete} title="¿Eliminar pedido?" message={`¿Estás seguro de eliminar el pedido ${order.order_number || `PED-${order.id}`}?`} onConfirm={handleDelete} />
+     {/* Diálogo de confirmación para eliminar */}
+      <DeleteDialog 
+        open={showDelete} 
+        onOpenChange={setShowDelete} 
+        title="¿Eliminar pedido?" 
+        message={`¿Estás seguro de eliminar el pedido ${order.order_number || `PED-${order.id}`}?`} 
+        onConfirm={handleDelete} 
+       />
 
       {/* Diálogo de confirmación para guardar cambios */}
-<SaveChangesDialog 
-  open={showSaveConfirm} 
-  onOpenChange={setShowSaveConfirm}
-  onSave={() => { setShowSaveConfirm(false); handleSave(); }}
-  onDiscard={resetToOriginal}
-/>
+      <SaveChangesDialog 
+        open={showSaveConfirm} 
+        onOpenChange={setShowSaveConfirm}
+        onSave={() => { setShowSaveConfirm(false); handleSave(); }}
+        onDiscard={resetToOriginal}
+       />
 
-{/* Diálogo de confirmación para marcar como pagado */}
-<PayConfirmDialog 
-  open={showPayConfirm} 
-  onOpenChange={setShowPayConfirm}
-  onConfirm={saveChanges}
-  orderNumber={order.order_number || `PED-${order.id}`}
-/>
+      {/* Diálogo de confirmación para marcar como pagado */}
+     <PayConfirmDialog 
+       open={showPayConfirm} 
+       onOpenChange={setShowPayConfirm}
+       onConfirm={saveChanges}
+       orderNumber={order.order_number || `PED-${order.id}`}
+      />
     </div>
   );
 }

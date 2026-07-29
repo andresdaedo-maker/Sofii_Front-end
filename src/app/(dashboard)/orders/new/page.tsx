@@ -119,7 +119,7 @@ export default function NewOrderPage() {
         }
       }
 
-      await mutateAPI('/orders', 'POST', orderData); // ← SOLO ESTA LÍNEA CAMBIA
+      await mutateAPI('/orders', 'POST', orderData); 
 
       toast.success("Pedido creado exitosamente");
       window.location.href = "/orders";
@@ -141,28 +141,47 @@ export default function NewOrderPage() {
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
-          <CardHeader><CardTitle>Datos del Pedido</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle>Datos del Pedido</CardTitle>
+            </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <Label>Cliente</Label>
-              <Popover open={clientOpen} onOpenChange={setClientOpen}>
+              <Popover 
+              open={clientOpen} 
+              onOpenChange={setClientOpen}>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between">
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-between">
                     {selectedClient ? clients.find((c) => c.id === selectedClient)?.name : "Seleccionar cliente..."}
                     <Search className="ml-2 h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[300px] lg:w-[400px] p-0">
                   <div className="p-2">
-                    <Input placeholder="Buscar cliente..." value={searchClient} onChange={(e) => setSearchClient(e.target.value)} className="mb-2" />
+                    <Input 
+                      placeholder="Buscar cliente..." 
+                      value={searchClient} 
+                      onChange={(e) => setSearchClient(e.target.value)} 
+                      className="mb-2" />
                     <div className="max-h-[200px] overflow-y-auto">
                       {searchClient === "" ? 
                         <p className="text-sm text-gray-400 dark:text-gray-500 p-4 text-center">Escribe para buscar...</p> :
                         filteredClients.length === 0 ? 
                         <p className="text-sm text-gray-400 dark:text-gray-500 p-4 text-center">No encontrado</p> :
                         filteredClients.map((client) => (
-                          <div key={client.id} className="flex justify-between items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer rounded" onClick={() => { setSelectedClient(client.id); setClientOpen(false); setSearchClient(""); }}>
-                            <div><p className="font-medium">{client.name}</p><p className="text-xs text-gray-500 dark:text-gray-400">{client.phone}</p></div>
+                          <div 
+                          key={client.id} 
+                          className="flex justify-between items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer rounded" 
+                          onClick={() => 
+                          { setSelectedClient(client.id); 
+                          setClientOpen(false); 
+                          setSearchClient(""); }}
+                          >
+                            <div>
+                              <p className="font-medium">{client.name}</p><p className="text-xs text-gray-500 dark:text-gray-400">{client.phone}</p>
+                              </div>
                             <Badge variant="outline">{client.client_type}</Badge>
                           </div>
                         ))
@@ -175,7 +194,10 @@ export default function NewOrderPage() {
             
             <div>
               <Label>Fecha límite</Label>
-              <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+              <Input 
+              type="date" 
+              value={dueDate} 
+              onChange={(e) => setDueDate(e.target.value)} />
             </div>
             
             <div className="border-t dark:border-gray-700 pt-4">
@@ -185,7 +207,11 @@ export default function NewOrderPage() {
                 <Label className="mb-2 block">Filtrar por categoría</Label>
                 <select 
                   value={selectedCategory} 
-                  onChange={(e) => { setSelectedCategory(e.target.value); setSelectedProduct(null); setSearchProduct(""); setEditPrice(""); }} 
+                  onChange={(e) => { 
+                    setSelectedCategory(e.target.value); 
+                    setSelectedProduct(null); 
+                    setSearchProduct(""); 
+                    setEditPrice(""); }} 
                   className="w-full border rounded-md p-2 bg-white dark:bg-gray-900 dark:text-white dark:border-gray-600"
                 >
                   <option value=""> Todas las categorías</option>
@@ -196,7 +222,18 @@ export default function NewOrderPage() {
               <div className="space-y-3">
                 <div className="relative">
                   <Label>Producto</Label>
-                  <Input type="text" placeholder="🔍 Escribe para buscar producto..." value={searchProduct} onChange={(e) => { setSearchProduct(e.target.value); setSelectedProduct(null); setProductOpen(e.target.value.length > 0); }} onFocus={() => { if (searchProduct.length > 0) setProductOpen(true); }} className="mt-1" />
+                  <Input 
+                   type="text" 
+                   placeholder="Escribe para buscar producto..." 
+                   value={searchProduct} 
+                   onChange={(e) => { 
+                    setSearchProduct(e.target.value); 
+                    setSelectedProduct(null); 
+                    setProductOpen(e.target.value.length > 0);
+                     }} 
+                     onFocus={() => { 
+                      if (searchProduct.length > 0) setProductOpen(true); 
+                      }} className="mt-1" />
                   
                   {productOpen && searchProduct && (
                     <div className="absolute z-10 w-full bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-md mt-1 max-h-48 overflow-y-auto shadow-lg">
@@ -214,8 +251,21 @@ export default function NewOrderPage() {
                   )}
                 </div>
                 
-                <div><Label>Precio unitario</Label><Input type="number" value={editPrice} onChange={(e) => setEditPrice(e.target.value)} /></div>
-                <div><Label>Cantidad</Label><Input type="number" min="1" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} /></div>
+                <div>
+                  <Label>Precio unitario</Label>
+                    <Input 
+                      type="number" 
+                      value={editPrice} 
+                      onChange={(e) => setEditPrice(e.target.value)} />
+                      </div>
+                <div>
+                  <Label>Cantidad</Label>
+                   <Input 
+                    type="number" 
+                    min="1" 
+                    value={quantity} 
+                    onChange={(e) => setQuantity(Number(e.target.value))} />
+                  </div>
                 <Button onClick={addItem} className="w-full">+ Agregar al pedido</Button>
               </div>
             </div>
@@ -223,13 +273,23 @@ export default function NewOrderPage() {
         </Card>
         
         <Card>
-          <CardHeader><CardTitle>Vista Previa</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle>Vista Previa</CardTitle>
+            </CardHeader>
           <CardContent>
             <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 min-h-[300px]">
               <p className="text-lg font-bold text-center dark:text-white">Cliente: {clients.find((c) => c.id === selectedClient)?.name || "Sin seleccionar"}</p>
               <p className="text-sm text-center text-gray-500 dark:text-gray-400">Vence: {dueDate || "Sin fecha"}</p>
               <Table>
-                <TableHeader><TableRow><TableHead>Producto</TableHead><TableHead>Cant</TableHead><TableHead>Precio</TableHead><TableHead>Subtotal</TableHead><TableHead></TableHead></TableRow></TableHeader>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Producto</TableHead>
+                    <TableHead>Cant</TableHead>
+                    <TableHead>Precio</TableHead>
+                    <TableHead>Subtotal</TableHead>
+                    <TableHead></TableHead>
+                    </TableRow>
+                    </TableHeader>
                 <TableBody>
                   {items.map((item) => (
                     <TableRow key={item.id}>
@@ -237,7 +297,8 @@ export default function NewOrderPage() {
                       <TableCell>{item.quantity}</TableCell>
                       <TableCell>${item.unit_price?.toLocaleString('es-CO')}</TableCell>
                       <TableCell>${item.subtotal?.toLocaleString('es-CO')}</TableCell>
-                      <TableCell><button onClick={() => removeItem(item.id)} className="text-red-500">✕</button></TableCell>
+                      <TableCell><button onClick={() => removeItem(item.id)} className="text-red-500">✕</button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -247,10 +308,18 @@ export default function NewOrderPage() {
             
             <div className="mt-4">
               <Label>Observaciones</Label>
-              <textarea value={observaciones} onChange={(e) => setObservaciones(e.target.value)} placeholder="Notas adicionales del pedido..." className="w-full border rounded-md p-2 min-h-[80px] dark:bg-gray-800 dark:text-white dark:border-gray-600" rows={3} />
+              <textarea 
+                value={observaciones} 
+                onChange={(e) => setObservaciones(e.target.value)} 
+                placeholder="Notas adicionales del pedido..." 
+                className="w-full border rounded-md p-2 min-h-[80px] dark:bg-gray-800 dark:text-white dark:border-gray-600"
+                rows={3} />
             </div>
             
-            <Button onClick={saveOrder} disabled={loading} className="w-full mt-4">{loading ? "Guardando..." : " Guardar Pedido"}</Button>
+            <Button 
+            onClick={saveOrder} 
+            disabled={loading} 
+            className="w-full mt-4">{loading ? "Guardando..." : " Guardar Pedido"}</Button>
           </CardContent>
         </Card>
       </div>

@@ -79,13 +79,15 @@ export default function OrdersPage() {
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h1 className="text-2xl lg:text-3xl font-bold dark:text-white"> Pedidos</h1>
-        <Link href="/orders/new" className="bg-black dark:bg-white dark:text-black text-white px-4 py-2 rounded-md hover:bg-gray-800 dark:hover:bg-gray-200 transition">+ Nuevo Pedido</Link>
+        <Link 
+          href="/orders/new" 
+          className="bg-black dark:bg-white dark:text-black text-white px-4 py-2 rounded-md hover:bg-gray-800 dark:hover:bg-gray-200 transition">+ Nuevo Pedido</Link>
       </div>
-
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
         <Link 
           href="/orders" 
-          className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${categoriaSeleccionada === '' ? 'bg-black text-white dark:bg-white dark:text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}`}
+          className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition 
+            ${categoriaSeleccionada === '' ? 'bg-black text-white dark:bg-white dark:text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}`}
         >
            General
         </Link>
